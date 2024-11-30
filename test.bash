@@ -1,4 +1,7 @@
 #!/bin/bash
+# SPDX-FileCopyrightText: 2024 Yamamoto Kurumi mail<s23c1144fj@s.chibakoudai.jp>
+# SPDX-License-Identifier: BSD-3-Clause
+
 
 # テスト1: 商品を追加
 echo "テスト1: 商品を追加" 
