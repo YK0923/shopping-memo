@@ -1,0 +1,144 @@
+#!/usr/bin/python3
+
+import os
+
+from datetime import datetime  # 日付と時刻を扱うためのモジュール
+
+# 初期化
+shopping_list = []  # 商品リスト（商品名, 価格, 個数のペア）
+
+# 商品リストを表示する関数
+def display_list():
+    if not shopping_list:
+        print("買い物リストは空です。")
+    else:
+        print("現在の買い物リスト:")
+        for i, (item, price, quantity) in enumerate(shopping_list, start=1):
+            total_price = price * quantity
+            print(f"{i}. {item} - {price}円 x {quantity}個 = {total_price}円")
+    print()
+
+# 商品を追加する関数
+def add_item():
+    item = input("商品名を入力してください: ")
+    try:
+        price = int(input(f"{item}の価格を入力してください: "))
+        quantity = int(input(f"{item}の個数を入力してください: "))
+        shopping_list.append((item, price, quantity))
+        print(f"{item}（{price}円 x {quantity}個）をリストに追加しました。\n")
+    except ValueError:
+        print("価格と個数は数字で入力してください。\n")
+
+# 商品を削除する関数
+def remove_item():
+    display_list()
+    try:
+        index = int(input("削除する商品の番号を入力してください: ")) - 1
+        if 0 <= index < len(shopping_list):
+            removed_item = shopping_list.pop(index)
+            print(f"{removed_item[0]}をリストから削除しました。\n")
+        else:
+            print("無効な番号です。\n")
+    except ValueError:
+        print("番号は数字で入力してください。\n")
+
+# 合計金額を表示する関数
+def show_total():
+    total = sum(price * quantity for _, price, quantity in shopping_list)
+    print(f"現在の合計金額: {total}円\n")
+
+# 商品の個数を変更する関数
+def change_quantity():
+    display_list()
+    try:
+        index = int(input("個数を変更したい商品の番号を入力してください: ")) - 1
+        if 0 <= index < len(shopping_list):
+            item, price, quantity = shopping_list[index]
+            new_quantity = int(input(f"{item}の新しい個数を入力してください（現在: {quantity}個）: "))
+            shopping_list[index] = (item, price, new_quantity)
+            print(f"{item}の個数を{quantity}個から{new_quantity}個に変更しました。\n")
+        else:
+            print("無効な番号です。\n")
+    except ValueError:
+        print("無効な入力です。もう一度試してください。\n")
+
+# リストをファイルに保存する関数（上書き確認と別名保存オプション）
+def save_to_file():
+    while True:
+        filename = input("保存するファイル名を入力してください（例: shopping_list.txt）: ")
+
+        if os.path.exists(filename):
+            overwrite = input(f"{filename}はすでに存在します。上書きしてもよろしいですか？(y/n): ")
+            if overwrite.lower() == 'y':
+                break  # 上書きして保存
+            elif overwrite.lower() == 'n':
+                print("別のファイル名を入力してください。\n")
+                continue  # 別のファイル名を入力させる
+            else:
+                print("無効な入力です。もう一度選んでください。\n")
+                continue
+        else:
+            break  # ファイルが存在しない場合はそのまま保存
+
+    # ファイルに保存（現在の日付と時刻も記録）
+    with open(filename, "a") as file:  # "a"モードで追記
+        now = datetime.now()  # 現在の日付と時刻を取得
+        timestamp = now.strftime("%Y-%m-%d %H:%M:%S")  # フォーマット: YYYY-MM-DD HH:MM:SS
+        file.write(f"# 保存日時: {timestamp}\n")  # 保存日時を記録
+        for item, price, quantity in shopping_list:
+            file.write(f"{item},{price},{quantity}\n")
+        file.write("\n")  # 区切りの空行
+    print(f"リストを{filename}に保存しました。（保存日時: {timestamp}）\n")
+
+# ファイルからリストを読み込む関数
+def load_from_file():
+    filename = input("読み込むファイル名を入力してください（例: shopping_list.txt）: ")
+    if os.path.exists(filename):
+        with open(filename, "r") as file:
+            global shopping_list
+            shopping_list = []
+            for line in file:
+                if not line.startswith("#") and line.strip():  # コメント行と空行をスキップ
+                    item, price, quantity = line.strip().split(",")
+                    shopping_list.append((item, int(price), int(quantity)))
+        print(f"{filename}からリストを読み込みました。\n")
+    else:
+        print(f"{filename}が見つかりません。\n")
+
+# メインプログラム
+def main():
+    while True:
+        print("=== 買い物リスト管理ツール ===")
+        print("1. リストを表示")
+        print("2. 商品を追加")
+        print("3. 商品を削除")
+        print("4. 合計金額を表示")
+        print("5. 商品の個数を変更")
+        print("6. リストを保存")
+        print("7. リストを読み込み")
+        print("8. 終了")
+        choice = input("選択してください: ")
+
+        if choice == "1":
+            display_list()
+        elif choice == "2":
+            add_item()
+        elif choice == "3":
+            remove_item()
+        elif choice == "4":
+            show_total()
+        elif choice == "5":
+            change_quantity()
+        elif choice == "6":
+            save_to_file()
+        elif choice == "7":
+            load_from_file()
+        elif choice == "8":
+            print("終了します。")
+            break
+        else:
+            print("無効な選択です。もう一度選んでください。\n")
+
+# 実行
+if __name__ == "__main__":
+    main()
